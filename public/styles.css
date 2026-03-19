@@ -4,9 +4,9 @@
    ============================================ */
 
 :root {
-  --navy: #0a1628;
-  --navy-light: #132240;
-  --navy-mid: #1a2d4a;
+  --navy: #0a0a0f;
+  --navy-light: #121218;
+  --navy-mid: #1a1a22;
   --blue: #1e3a5f;
   --blue-accent: #2563eb;
   --blue-glow: rgba(37, 99, 235, 0.35);
@@ -75,7 +75,7 @@ button { cursor: pointer; }
 
 .slides-track {
   display: flex;
-  width: 700vw;
+  width: 800vw;
   height: 100vh;
   transition: transform 0.9s var(--ease-smooth);
   will-change: transform;
@@ -138,7 +138,7 @@ button { cursor: pointer; }
   height: 58px;
   border-radius: 50%;
   border: 1.5px solid rgba(255,255,255,0.2);
-  background: rgba(10, 22, 40, 0.45);
+  background: rgba(10, 10, 15, 0.45);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   display: flex;
@@ -274,7 +274,7 @@ button { cursor: pointer; }
   right: 0;
   z-index: 500;
   padding: 0.8rem 2rem;
-  background: rgba(10, 22, 40, 0.55);
+  background: rgba(10, 10, 15, 0.55);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-bottom: 1px solid rgba(255,255,255,0.06);
@@ -564,7 +564,7 @@ button { cursor: pointer; }
    SLIDE 1: HERO (with particles)
    ============================================ */
 .slide-hero {
-  background: rgba(10, 22, 40, 0.85);
+  background: rgba(10, 10, 15, 0.85);
   text-align: center;
 }
 
@@ -572,9 +572,9 @@ button { cursor: pointer; }
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse at 20% 50%, rgba(10,22,40,0.7) 0%, transparent 55%),
-    radial-gradient(ellipse at 80% 20%, rgba(10,22,40,0.5) 0%, transparent 45%),
-    radial-gradient(ellipse at 50% 50%, rgba(10,22,40,0.4) 0%, transparent 70%);
+    radial-gradient(ellipse at 20% 50%, rgba(10,10,15,0.7) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 20%, rgba(10,10,15,0.5) 0%, transparent 45%),
+    radial-gradient(ellipse at 50% 50%, rgba(10,10,15,0.4) 0%, transparent 70%);
   z-index: 1;
 }
 
@@ -831,7 +831,7 @@ button { cursor: pointer; }
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, transparent 40%, rgba(10,22,40,0.7) 100%);
+  background: linear-gradient(180deg, transparent 40%, rgba(10,10,15,0.7) 100%);
   opacity: 0;
   transition: opacity 0.3s;
 }
@@ -870,7 +870,7 @@ button { cursor: pointer; }
   background: linear-gradient(135deg, var(--navy), var(--navy-mid));
   border-radius: 8px;
   border-left: 4px solid var(--red);
-  box-shadow: 0 8px 25px rgba(10,22,40,0.3);
+  box-shadow: 0 8px 25px rgba(10,10,15,0.3);
   position: relative;
   overflow: hidden;
 }
@@ -987,7 +987,7 @@ button { cursor: pointer; }
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(10,22,40,0.15);
+  box-shadow: 0 2px 8px rgba(10,10,15,0.15);
 }
 
 .detail-icon svg {
@@ -1016,7 +1016,7 @@ button { cursor: pointer; }
    SLIDE 3: MILITARY SERVICE (glass cards)
    ============================================ */
 .slide-service {
-  background: rgba(10, 22, 40, 0.85);
+  background: rgba(10, 10, 15, 0.85);
 }
 
 .service-overlay {
@@ -1075,7 +1075,7 @@ button { cursor: pointer; }
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, transparent 50%, rgba(10,22,40,0.65) 100%);
+  background: linear-gradient(180deg, transparent 50%, rgba(10,10,15,0.65) 100%);
   pointer-events: none;
 }
 
@@ -1191,7 +1191,7 @@ button { cursor: pointer; }
    SLIDE 4: DISTRICT (data polish)
    ============================================ */
 .slide-district {
-  background: rgba(10, 22, 40, 0.88);
+  background: rgba(10, 10, 15, 0.88);
 }
 
 .district-layout {
@@ -1294,7 +1294,7 @@ button { cursor: pointer; }
 }
 
 .district-metrics .data-highlight {
-  background: linear-gradient(135deg, rgba(10,22,40,0.92), rgba(26,45,74,0.92));
+  background: linear-gradient(135deg, rgba(10,10,15,0.92), rgba(26,26,34,0.92));
 }
 
 .district-metrics .data-wave {
@@ -1372,7 +1372,7 @@ button { cursor: pointer; }
   text-transform: uppercase;
   letter-spacing: 0.05em;
   paint-order: stroke;
-  stroke: rgba(10,22,40,0.5);
+  stroke: rgba(10,10,15,0.5);
   stroke-width: 3px;
 }
 
@@ -1401,6 +1401,159 @@ button { cursor: pointer; }
   color: var(--gold-light);
 }
 
+/* ── Precinct zoom states ── */
+#mapSvg.zoomed path.precinct {
+  opacity: 0.2;
+  transition: opacity 0.4s;
+}
+#mapSvg.zoomed path.precinct.precinct-selected {
+  opacity: 1;
+  stroke: var(--gold-light);
+  stroke-width: 2.5;
+  filter: brightness(1.15) drop-shadow(0 0 6px rgba(212,168,67,0.5));
+}
+#mapSvg.zoomed path.county-border {
+  opacity: 0.15;
+}
+#mapSvg.zoomed text.county-label {
+  opacity: 0;
+}
+
+/* ── Precinct detail panel ── */
+.precinct-detail {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%) translateX(30px);
+  width: 260px;
+  background: rgba(10, 10, 15, 0.92);
+  border: 1px solid rgba(37, 99, 235, 0.35);
+  border-radius: 14px;
+  padding: 1.2rem;
+  z-index: 12;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s, transform 0.35s var(--ease-out-expo);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05) inset;
+}
+.precinct-detail.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(-50%) translateX(0);
+}
+
+.precinct-detail-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.5);
+  font-size: 1.3rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px;
+  transition: color 0.2s;
+}
+.precinct-detail-close:hover {
+  color: var(--white);
+}
+
+.pd-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.8rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.pd-county {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--gold-light);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.pd-vtd {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.5);
+}
+
+.pd-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  margin-bottom: 0.8rem;
+}
+.pd-stat {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 0.5rem 0.6rem;
+  text-align: center;
+}
+.pd-stat-num {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--white);
+}
+.pd-stat-lbl {
+  font-size: 0.58rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(255,255,255,0.4);
+  margin-top: 0.1rem;
+}
+
+.pd-demos-title {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.35);
+  margin-bottom: 0.4rem;
+}
+
+.pd-demos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.demo-bar-row {
+  display: grid;
+  grid-template-columns: 58px 1fr 32px;
+  gap: 0.4rem;
+  align-items: center;
+}
+.demo-bar-label {
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.6);
+  font-weight: 500;
+}
+.demo-bar-track {
+  height: 6px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.demo-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s var(--ease-out-expo);
+}
+.demo-bar-pct {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.7);
+  text-align: right;
+}
+
 .map-legend-inline {
   position: absolute;
   bottom: 8px;
@@ -1409,7 +1562,7 @@ button { cursor: pointer; }
   align-items: center;
   gap: 0.4rem;
   padding: 0.3rem 0.6rem;
-  background: rgba(10,22,40,0.6);
+  background: rgba(10,10,15,0.6);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border-radius: 6px;
@@ -1429,7 +1582,7 @@ button { cursor: pointer; }
   width: 100px;
   height: 6px;
   border-radius: 3px;
-  background: linear-gradient(to right, #166534, #facc15);
+  background: linear-gradient(to right, #2a2a2a, #facc15);
 }
 
 .legend-lo, .legend-hi {
@@ -1486,7 +1639,7 @@ button { cursor: pointer; }
 .data-highlight {
   background: linear-gradient(135deg, var(--navy), var(--navy-mid));
   border-color: transparent;
-  box-shadow: 0 6px 20px rgba(10,22,40,0.3);
+  box-shadow: 0 6px 20px rgba(10,10,15,0.3);
 }
 .data-highlight .data-number { color: var(--white); }
 .data-highlight .data-label { color: rgba(255,255,255,0.65); }
@@ -1640,12 +1793,12 @@ button { cursor: pointer; }
   align-items: center;
   justify-content: center;
   margin-bottom: 0.5rem;
-  box-shadow: 0 4px 12px rgba(10,22,40,0.2);
+  box-shadow: 0 4px 12px rgba(10,10,15,0.2);
   transition: all 0.3s;
 }
 
 .platform-card:hover .platform-icon {
-  box-shadow: 0 6px 18px rgba(10,22,40,0.3);
+  box-shadow: 0 6px 18px rgba(10,10,15,0.3);
   transform: scale(1.05);
 }
 
@@ -1808,10 +1961,281 @@ button { cursor: pointer; }
 }
 
 /* ============================================
-   SLIDE 7: DONATE (glass + glow)
+   SLIDE 7: PATH TO VICTORY (chart + table)
+   ============================================ */
+.slide-victory {
+  background: rgba(10, 10, 15, 0.88);
+}
+
+.victory-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 30% 30%, rgba(37,99,235,0.1) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 70%, rgba(212,168,67,0.06) 0%, transparent 40%),
+    linear-gradient(160deg, var(--navy) 0%, var(--navy-light) 100%);
+}
+
+.slide-victory .slide-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  max-height: 100vh;
+  max-width: 1400px;
+  padding-top: 3.8rem;
+  padding-bottom: 1rem;
+  justify-content: center;
+}
+
+.victory-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.6rem;
+  flex-shrink: 0;
+}
+
+.victory-summary {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.victory-stat {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 0.6rem 1.2rem;
+  text-align: center;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.victory-stat-highlight {
+  background: linear-gradient(135deg, rgba(37,99,235,0.2), rgba(37,99,235,0.08));
+  border-color: rgba(37,99,235,0.3);
+}
+
+.victory-stat-number {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.victory-stat-highlight .victory-stat-number {
+  color: var(--gold-light);
+}
+
+.victory-stat-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.5);
+  margin-top: 0.15rem;
+}
+
+.victory-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 1.2rem;
+  margin-bottom: 0.6rem;
+  flex: 1;
+  min-height: 0;
+}
+
+.victory-chart-wrap {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#winChart {
+  width: 100%;
+  height: 100%;
+}
+
+/* Interactive table */
+.victory-table {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  justify-content: center;
+}
+
+.vtable-row {
+  display: grid;
+  grid-template-columns: 1.4fr 0.6fr 1fr 1fr;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.55rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.7);
+  transition: all 0.25s;
+  position: relative;
+  cursor: default;
+}
+
+.vtable-header {
+  font-weight: 700;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.45);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding-bottom: 0.55rem;
+  margin-bottom: 0.15rem;
+}
+
+.vtable-row:not(.vtable-header):hover {
+  background: rgba(255,255,255,0.06);
+  color: var(--white);
+}
+
+.vtable-row::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0.7rem;
+  right: 0.7rem;
+  height: 1px;
+  background: rgba(255,255,255,0.04);
+}
+
+.vtable-header::after { display: none; }
+
+.vtable-highlight {
+  background: rgba(37,99,235,0.08);
+  border-left: 2px solid var(--blue-accent);
+  color: rgba(255,255,255,0.8);
+}
+
+.vtable-highlight .vtable-win {
+  color: var(--gold-light);
+  font-weight: 700;
+}
+
+.vtable-ceiling {
+  background: linear-gradient(135deg, rgba(192,57,43,0.12), rgba(192,57,43,0.04));
+  border-left: 2px solid var(--red);
+}
+
+.vtable-ceiling .vtable-win {
+  color: var(--red-bright);
+  font-weight: 700;
+}
+
+.vtable-win {
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+
+.vtable-total {
+  font-family: var(--font-display);
+}
+
+/* Progress bar inside each row */
+.vtable-row:not(.vtable-header) {
+  overflow: hidden;
+}
+
+.vtable-row .vtable-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  opacity: 0.06;
+  border-radius: 6px;
+  transition: width 1.2s var(--ease-out-expo);
+  width: 0;
+  pointer-events: none;
+}
+
+.vtable-highlight .vtable-bar {
+  background: var(--blue-accent);
+  opacity: 0.1;
+}
+
+.vtable-ceiling .vtable-bar {
+  background: var(--red);
+  opacity: 0.1;
+}
+
+.vtable-row:not(.vtable-header):not(.vtable-highlight):not(.vtable-ceiling) .vtable-bar {
+  background: rgba(255,255,255,1);
+}
+
+.victory-note {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-left: 3px solid var(--blue-accent);
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  flex-shrink: 0;
+}
+
+.victory-note p {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.55);
+  line-height: 1.5;
+}
+
+.victory-note strong {
+  color: var(--gold-light);
+}
+
+/* Chart tooltip */
+.chart-tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: rgba(10, 10, 15, 0.92);
+  border: 1px solid rgba(37, 99, 235, 0.4);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--text-light);
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.15s, transform 0.15s;
+  z-index: 10;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+.chart-tooltip.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.chart-tooltip strong {
+  display: block;
+  color: var(--gold-light);
+  font-size: 0.82rem;
+  margin-bottom: 2px;
+}
+
+/* Table row hover highlight (synced with chart) */
+.vtable-hover {
+  background: rgba(37, 99, 235, 0.15) !important;
+  border-color: rgba(37, 99, 235, 0.3) !important;
+}
+.vtable-hover .vtable-bar {
+  filter: brightness(1.3);
+}
+
+/* ============================================
+   SLIDE 8: DONATE (glass + glow)
    ============================================ */
 .slide-donate {
-  background: rgba(10, 22, 40, 0.85);
+  background: rgba(10, 10, 15, 0.85);
 }
 
 .donate-overlay {
@@ -2080,7 +2504,7 @@ button { cursor: pointer; }
     top: 0; right: -100%;
     width: 260px;
     height: 100vh;
-    background: rgba(10,22,40,0.95);
+    background: rgba(10,10,15,0.95);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     flex-direction: column;

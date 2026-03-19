@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let isAnimating = false;
 
   // Light-background slides
-  const lightSlides = new Set([1, 4, 5]);
+  const lightSlides = new Set([1, 5, 6]);
 
   // ═══════════════════════════════════════════
   // COLOR SCHEMES per slide type
@@ -550,10 +550,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const logMax = Math.log(maxVoters);
 
       function voterColor(voters) {
-        if (!voters || voters <= 0) return '#166534';
+        if (!voters || voters <= 0) return '#2a2a2a';
         const t = (Math.log(voters) - logMin) / (logMax - logMin);
-        // Dark green → Bright yellow
-        return lerpHex('#166534', '#facc15', t);
+        // Dark grey → Bright yellow
+        return lerpHex('#2a2a2a', '#facc15', t);
       }
 
       function lerpHex(a, b, t) {
@@ -583,6 +583,150 @@ document.addEventListener('DOMContentLoaded', () => {
         return '';
       }
 
+      // Store original viewBox for zoom-out
+      const origViewBox = `0 0 ${svgW} ${svgH}`;
+      let isZoomed = false;
+      let selectedPath = null;
+      let zoomAnim = null;
+
+      // Create precinct detail panel
+      const detailPanel = document.createElement('div');
+      detailPanel.className = 'precinct-detail';
+      detailPanel.innerHTML = '<button class="precinct-detail-close">&times;</button><div class="precinct-detail-content"></div>';
+      container.appendChild(detailPanel);
+
+      const detailClose = detailPanel.querySelector('.precinct-detail-close');
+      const detailContent = detailPanel.querySelector('.precinct-detail-content');
+
+      // Animate viewBox smoothly
+      function animateViewBox(from, to, duration, cb) {
+        if (zoomAnim) cancelAnimationFrame(zoomAnim);
+        const fromVals = from.split(' ').map(Number);
+        const toVals = to.split(' ').map(Number);
+        const start = performance.now();
+        function tick(now) {
+          const t = Math.min((now - start) / duration, 1);
+          const ease = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+          const cur = fromVals.map((v, i) => v + (toVals[i] - v) * ease);
+          svg.setAttribute('viewBox', cur.map(v => v.toFixed(1)).join(' '));
+          if (t < 1) { zoomAnim = requestAnimationFrame(tick); }
+          else { zoomAnim = null; if (cb) cb(); }
+        }
+        zoomAnim = requestAnimationFrame(tick);
+      }
+
+      // Compute bounding box of a feature in SVG coords
+      function featureBBox(feature) {
+        const coords = feature.geometry.type === 'MultiPolygon'
+          ? feature.geometry.coordinates.flat(2)
+          : feature.geometry.coordinates.flat(1);
+        let x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity;
+        coords.forEach(c => {
+          const [px, py] = project(c);
+          if (px < x1) x1 = px;
+          if (py < y1) y1 = py;
+          if (px > x2) x2 = px;
+          if (py > y2) y2 = py;
+        });
+        return { x: x1, y: y1, w: x2 - x1, h: y2 - y1 };
+      }
+
+      // Build demographics bar chart HTML
+      function demoBars(p) {
+        if (!p.t || p.t <= 0) return '';
+        const groups = [
+          { label: 'Anglo', val: p.anglo || 0, color: '#60a5fa' },
+          { label: 'Hispanic', val: p.hisp || 0, color: '#f59e0b' },
+          { label: 'Black', val: p.black || 0, color: '#34d399' },
+          { label: 'Asian', val: p.asian || 0, color: '#a78bfa' },
+        ];
+        return groups.map(g => {
+          const pct = Math.round(g.val / p.t * 100);
+          return `<div class="demo-bar-row">
+            <span class="demo-bar-label">${g.label}</span>
+            <div class="demo-bar-track"><div class="demo-bar-fill" style="width:${pct}%;background:${g.color}"></div></div>
+            <span class="demo-bar-pct">${pct}%</span>
+          </div>`;
+        }).join('');
+      }
+
+      // Show detail panel for a feature
+      function showPrecinctDetail(feature) {
+        const p = feature.properties;
+        detailContent.innerHTML = `
+          <div class="pd-header">
+            <span class="pd-county">${p.c || 'Unknown'} County</span>
+            <span class="pd-vtd">VTD ${p.v || 'Unknown'}</span>
+          </div>
+          <div class="pd-stats">
+            <div class="pd-stat">
+              <div class="pd-stat-num">${p.t ? p.t.toLocaleString() : 'N/A'}</div>
+              <div class="pd-stat-lbl">Registered Voters</div>
+            </div>
+            <div class="pd-stat">
+              <div class="pd-stat-num">${p.vap ? p.vap.toLocaleString() : 'N/A'}</div>
+              <div class="pd-stat-lbl">Voting Age Pop</div>
+            </div>
+          </div>
+          <div class="pd-demos-title">Demographics</div>
+          <div class="pd-demos">${demoBars(p)}</div>
+        `;
+        detailPanel.classList.add('visible');
+      }
+
+      function hidePrecinctDetail() {
+        detailPanel.classList.remove('visible');
+      }
+
+      // Zoom into a precinct
+      function zoomToPrecinct(pathEl, feature) {
+        if (selectedPath) selectedPath.classList.remove('precinct-selected');
+        selectedPath = pathEl;
+        pathEl.classList.add('precinct-selected');
+        svg.classList.add('zoomed');
+        isZoomed = true;
+
+        const bb = featureBBox(feature);
+        // Add padding around the precinct (at least 40% of the bbox on each side)
+        const padFactor = 1.8;
+        const cx = bb.x + bb.w / 2;
+        const cy = bb.y + bb.h / 2;
+        const zw = Math.max(bb.w * padFactor, 60);
+        const zh = Math.max(bb.h * padFactor, 60);
+        const targetVB = `${cx - zw/2} ${cy - zh/2} ${zw} ${zh}`;
+
+        const currentVB = svg.getAttribute('viewBox');
+        animateViewBox(currentVB, targetVB, 500);
+        tooltip.classList.remove('visible');
+        showPrecinctDetail(feature);
+      }
+
+      // Zoom out to full map
+      function zoomOut() {
+        if (!isZoomed) return;
+        if (selectedPath) selectedPath.classList.remove('precinct-selected');
+        selectedPath = null;
+        svg.classList.remove('zoomed');
+        isZoomed = false;
+
+        const currentVB = svg.getAttribute('viewBox');
+        animateViewBox(currentVB, origViewBox, 400);
+        hidePrecinctDetail();
+      }
+
+      // Close button
+      detailClose.addEventListener('click', (e) => {
+        e.stopPropagation();
+        zoomOut();
+      });
+
+      // Click outside precinct to dismiss (on map container background)
+      container.addEventListener('click', (e) => {
+        if (isZoomed && !e.target.closest('.precinct') && !e.target.closest('.precinct-detail')) {
+          zoomOut();
+        }
+      });
+
       // Draw precincts
       features.forEach(f => {
         const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -591,14 +735,28 @@ document.addEventListener('DOMContentLoaded', () => {
         path.setAttribute('fill', voterColor(f.properties.t));
 
         path.addEventListener('mouseenter', (e) => {
-          const county = f.properties.c || 'Unknown';
-          const vtd = f.properties.v || 'Unknown';
-          const voters = f.properties.t ? f.properties.t.toLocaleString() : 'N/A';
-          tooltip.innerHTML = `<strong>${county} County</strong>Precinct: ${vtd}<br>Registered Voters: ${voters}`;
+          if (isZoomed) return;
+          const p = f.properties;
+          const county = p.c || 'Unknown';
+          const vtd = p.v || 'Unknown';
+          const voters = p.t ? p.t.toLocaleString() : 'N/A';
+          const vap = p.vap ? p.vap.toLocaleString() : 'N/A';
+          let demo = '';
+          if (p.t > 0) {
+            const pcts = [
+              p.anglo ? `Anglo ${Math.round(p.anglo/p.t*100)}%` : '',
+              p.hisp ? `Hisp ${Math.round(p.hisp/p.t*100)}%` : '',
+              p.black ? `Black ${Math.round(p.black/p.t*100)}%` : '',
+              p.asian ? `Asian ${Math.round(p.asian/p.t*100)}%` : ''
+            ].filter(Boolean).join(' · ');
+            demo = `<br><span style="opacity:0.7">${pcts}</span>`;
+          }
+          tooltip.innerHTML = `<strong>${county} County — VTD ${vtd}</strong>Registered: ${voters} · VAP: ${vap}${demo}`;
           tooltip.classList.add('visible');
         });
 
         path.addEventListener('mousemove', (e) => {
+          if (isZoomed) return;
           const rect = container.getBoundingClientRect();
           const x = e.clientX - rect.left + 12;
           const y = e.clientY - rect.top - 10;
@@ -608,6 +766,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         path.addEventListener('mouseleave', () => {
           tooltip.classList.remove('visible');
+        });
+
+        path.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (isZoomed && selectedPath === path) {
+            zoomOut();
+          } else {
+            zoomToPrecinct(path, f);
+          }
         });
 
         svg.appendChild(path);
@@ -657,6 +824,258 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   initDistrictMap();
+
+  // ═══════════════════════════════════════════
+  // WIN NUMBER AREA CHART + TABLE ANIMATION
+  // ═══════════════════════════════════════════
+  function initWinChart() {
+    const canvas = document.getElementById('winChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const wrap = canvas.parentElement;
+
+    const data = [
+      { label: '50%', scenario: 'Baseline Midterm', total: 273187, win: 136594 },
+      { label: '55%', scenario: 'Elevated Midterm', total: 300505, win: 150253 },
+      { label: '60%', scenario: 'High Engagement', total: 327824, win: 163913 },
+      { label: '65%', scenario: 'Wave Midterm', total: 355143, win: 177572 },
+      { label: '70%', scenario: 'Exceptional', total: 382461, win: 191231 },
+      { label: '75%', scenario: 'Near-Presidential', total: 409780, win: 204891 },
+      { label: '80%', scenario: 'Very High', total: 437099, win: 218550 },
+      { label: '85%', scenario: 'Max Protection', total: 464417, win: 232209 },
+    ];
+
+    const maxVal = 480000;
+    let chartAnimated = false;
+    let hoveredIdx = -1;
+    let chartDims = {};
+
+    // Create chart tooltip
+    const chartTip = document.createElement('div');
+    chartTip.className = 'chart-tooltip';
+    wrap.style.position = 'relative';
+    wrap.appendChild(chartTip);
+
+    function getChartDims() {
+      const rect = canvas.getBoundingClientRect();
+      const W = rect.width, H = rect.height;
+      const padL = 55, padR = 16, padT = 30, padB = 32;
+      return { W, H, padL, padR, padT, padB, chartW: W - padL - padR, chartH: H - padT - padB, stepX: (W - padL - padR) / (data.length - 1) };
+    }
+
+    function drawChart(progress, hIdx) {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+      const { W, H, padL, padR, padT, padB, chartW, chartH, stepX } = chartDims = getChartDims();
+
+      ctx.clearRect(0, 0, W, H);
+
+      // Grid
+      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 4; i++) {
+        const y = padT + chartH * (1 - i / 4);
+        ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL + chartW, y); ctx.stroke();
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.font = '10px Inter, sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText((maxVal * i / 4 / 1000).toFixed(0) + 'K', padL - 5, y + 3);
+      }
+
+      const clipX = padL + chartW * progress;
+      ctx.save();
+      ctx.beginPath(); ctx.rect(0, 0, clipX, H); ctx.clip();
+
+      // Highlight zone (60-70%)
+      const z1 = padL + 2 * stepX, z2 = padL + 4 * stepX;
+      ctx.fillStyle = 'rgba(37,99,235,0.05)';
+      ctx.fillRect(z1, padT, z2 - z1, chartH);
+      ctx.strokeStyle = 'rgba(37,99,235,0.15)';
+      ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
+      ctx.beginPath(); ctx.moveTo(z1, padT); ctx.lineTo(z1, padT + chartH); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(z2, padT); ctx.lineTo(z2, padT + chartH); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = 'rgba(96,165,250,0.85)';
+      ctx.font = 'bold 9px Inter, sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('WAVE ZONE', (z1 + z2) / 2, padT + 12);
+
+      // Hover column highlight
+      if (hIdx >= 0) {
+        const hx = padL + hIdx * stepX;
+        ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 1; ctx.setLineDash([]);
+        ctx.beginPath(); ctx.moveTo(hx, padT); ctx.lineTo(hx, padT + chartH); ctx.stroke();
+      }
+
+      // Total area
+      const lastX = padL + (data.length - 1) * stepX;
+      ctx.beginPath();
+      data.forEach((d, i) => { const x = padL + i * stepX, y = padT + chartH * (1 - d.total / maxVal); i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
+      ctx.lineTo(lastX, padT + chartH); ctx.lineTo(padL, padT + chartH); ctx.closePath();
+      const tg = ctx.createLinearGradient(0, padT, 0, padT + chartH);
+      tg.addColorStop(0, 'rgba(255,255,255,0.1)'); tg.addColorStop(1, 'rgba(255,255,255,0.01)');
+      ctx.fillStyle = tg; ctx.fill();
+
+      // Win area
+      ctx.beginPath();
+      data.forEach((d, i) => { const x = padL + i * stepX, y = padT + chartH * (1 - d.win / maxVal); i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
+      ctx.lineTo(lastX, padT + chartH); ctx.lineTo(padL, padT + chartH); ctx.closePath();
+      const wg = ctx.createLinearGradient(0, padT, 0, padT + chartH);
+      wg.addColorStop(0, 'rgba(37,99,235,0.3)'); wg.addColorStop(1, 'rgba(37,99,235,0.03)');
+      ctx.fillStyle = wg; ctx.fill();
+
+      // Total line
+      ctx.beginPath(); ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 1.5;
+      data.forEach((d, i) => { const x = padL + i * stepX, y = padT + chartH * (1 - d.total / maxVal); i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
+      ctx.stroke();
+
+      // Win line
+      ctx.beginPath(); ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 2;
+      data.forEach((d, i) => { const x = padL + i * stepX, y = padT + chartH * (1 - d.win / maxVal); i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); });
+      ctx.stroke();
+
+      // Points
+      data.forEach((d, i) => {
+        const x = padL + i * stepX;
+        const isH = i === hIdx;
+        const wy = padT + chartH * (1 - d.win / maxVal);
+        const ty = padT + chartH * (1 - d.total / maxVal);
+
+        // Total dot
+        ctx.beginPath(); ctx.arc(x, ty, isH ? 4 : 2, 0, Math.PI * 2);
+        ctx.fillStyle = isH ? '#ffffff' : 'rgba(255,255,255,0.6)'; ctx.fill();
+
+        // Win dot
+        ctx.beginPath(); ctx.arc(x, wy, isH ? 5 : 3, 0, Math.PI * 2);
+        ctx.fillStyle = isH ? '#60a5fa' : '#2563eb'; ctx.fill();
+        if (isH) { ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke(); }
+
+        // Value labels on hover
+        if (isH) {
+          ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.font = 'bold 10px Inter, sans-serif'; ctx.textAlign = 'center';
+          ctx.fillText((d.total / 1000).toFixed(0) + 'K', x, ty - 10);
+          ctx.fillStyle = '#60a5fa';
+          ctx.fillText((d.win / 1000).toFixed(0) + 'K', x, wy - 10);
+        }
+      });
+
+      ctx.restore();
+
+      // X labels
+      ctx.font = '10px Inter, sans-serif'; ctx.textAlign = 'center';
+      data.forEach((d, i) => {
+        const x = padL + i * stepX;
+        ctx.fillStyle = i === hIdx ? '#ffffff' : 'rgba(255,255,255,0.6)';
+        ctx.fillText(d.label, x, padT + chartH + 18);
+      });
+
+      // Legend (top-left)
+      ctx.font = 'bold 10px Inter, sans-serif'; ctx.textAlign = 'left';
+      ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.fillRect(padL + 6, padT + 6, 12, 3);
+      ctx.fillText('Total Votes', padL + 22, padT + 10);
+      ctx.fillStyle = '#2563eb'; ctx.fillRect(padL + 6, padT + 20, 12, 3);
+      ctx.fillStyle = 'rgba(96,165,250,0.9)'; ctx.fillText('Win Number', padL + 22, padT + 24);
+    }
+
+    // Chart mouse interaction
+    function getHoverIdx(e) {
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const { padL, stepX } = chartDims;
+      if (!stepX) return -1;
+      const idx = Math.round((mx - padL) / stepX);
+      return idx >= 0 && idx < data.length ? idx : -1;
+    }
+
+    const tableRows = document.querySelectorAll('.vtable-row:not(.vtable-header)');
+
+    canvas.addEventListener('mousemove', (e) => {
+      const idx = getHoverIdx(e);
+      if (idx !== hoveredIdx) {
+        hoveredIdx = idx;
+        drawChart(1, hoveredIdx);
+        // Sync table
+        tableRows.forEach((r, i) => r.classList.toggle('vtable-hover', i === idx));
+        // Tooltip
+        if (idx >= 0) {
+          const d = data[idx];
+          chartTip.innerHTML = `<strong>${d.scenario}</strong>${d.label} turnout · Win: ${d.win.toLocaleString()}`;
+          chartTip.classList.add('visible');
+          const rect = canvas.getBoundingClientRect();
+          const wRect = wrap.getBoundingClientRect();
+          chartTip.style.left = (e.clientX - wRect.left + 12) + 'px';
+          chartTip.style.top = (e.clientY - wRect.top - 8) + 'px';
+        } else {
+          chartTip.classList.remove('visible');
+        }
+      } else if (idx >= 0) {
+        const wRect = wrap.getBoundingClientRect();
+        chartTip.style.left = (e.clientX - wRect.left + 12) + 'px';
+        chartTip.style.top = (e.clientY - wRect.top - 8) + 'px';
+      }
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+      hoveredIdx = -1;
+      drawChart(1, -1);
+      tableRows.forEach(r => r.classList.remove('vtable-hover'));
+      chartTip.classList.remove('visible');
+    });
+
+    // Table row hover → chart sync
+    tableRows.forEach((row, i) => {
+      row.addEventListener('mouseenter', () => {
+        hoveredIdx = i;
+        drawChart(1, i);
+        tableRows.forEach((r, j) => r.classList.toggle('vtable-hover', j === i));
+      });
+      row.addEventListener('mouseleave', () => {
+        hoveredIdx = -1;
+        drawChart(1, -1);
+        tableRows.forEach(r => r.classList.remove('vtable-hover'));
+      });
+    });
+
+    function animateChart() {
+      if (chartAnimated) return;
+      chartAnimated = true;
+      const start = performance.now();
+      const duration = 1800;
+      function step(now) {
+        const p = Math.min(1, (now - start) / duration);
+        const eased = 1 - Math.pow(1 - p, 3);
+        drawChart(eased, -1);
+        tableRows.forEach(row => {
+          const bar = row.querySelector('.vtable-bar');
+          if (bar) bar.style.width = ((parseInt(row.dataset.turnout) / 85) * 100 * eased) + '%';
+        });
+        if (p < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+
+    // Add progress bars
+    tableRows.forEach(row => {
+      const bar = document.createElement('div');
+      bar.className = 'vtable-bar';
+      row.appendChild(bar);
+    });
+
+    // Trigger on slide active
+    const victorySlide = slides[4];
+    if (victorySlide) {
+      const observer = new MutationObserver(() => {
+        if (victorySlide.classList.contains('active')) setTimeout(animateChart, 400);
+      });
+      observer.observe(victorySlide, { attributes: true, attributeFilter: ['class'] });
+    }
+
+    window.addEventListener('resize', () => { if (chartAnimated) drawChart(1, hoveredIdx); });
+  }
+
+  initWinChart();
 
   // ═══════════════════════════════════════════
   // INIT

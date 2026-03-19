@@ -20,9 +20,10 @@
         <li><a href="#" data-slide="1">About</a></li>
         <li><a href="#" data-slide="2">Service</a></li>
         <li><a href="#" data-slide="3">The District</a></li>
-        <li><a href="#" data-slide="4">Platform</a></li>
-        <li><a href="#" data-slide="5">The Stakes</a></li>
-        <li><a href="#" data-slide="6" class="nav-cta">Donate</a></li>
+        <li><a href="#" data-slide="4">Win Path</a></li>
+        <li><a href="#" data-slide="5">Platform</a></li>
+        <li><a href="#" data-slide="6">The Stakes</a></li>
+        <li><a href="#" data-slide="7" class="nav-cta">Donate</a></li>
       </ul>
       <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
         <span></span><span></span><span></span>
@@ -40,13 +41,14 @@
     <button class="dot" data-slide="4" aria-label="Slide 5"></button>
     <button class="dot" data-slide="5" aria-label="Slide 6"></button>
     <button class="dot" data-slide="6" aria-label="Slide 7"></button>
+    <button class="dot" data-slide="7" aria-label="Slide 8"></button>
   </div>
 
   <!-- Slide Counter -->
   <div class="slide-counter" id="slideCounter">
     <span class="counter-current">01</span>
     <span class="counter-sep">/</span>
-    <span class="counter-total">07</span>
+    <span class="counter-total">08</span>
   </div>
 
   <!-- Slides Wrapper -->
@@ -279,8 +281,95 @@
         </div>
       </section>
 
-      <!-- Slide 5: Platform -->
-      <section class="slide slide-platform" data-index="4">
+      <!-- Slide 5: Path to Victory -->
+      <section class="slide slide-victory" data-index="4">
+        <div class="victory-overlay"></div>
+        <div class="slide-inner">
+          <div class="victory-header">
+            <div>
+              <div class="section-tag section-tag-light">The Math</div>
+              <h2 class="section-title-light">The Path to Victory</h2>
+            </div>
+            <div class="victory-summary">
+              <div class="victory-stat">
+                <div class="victory-stat-number">546,374</div>
+                <div class="victory-stat-label">Registered Voters</div>
+              </div>
+              <div class="victory-stat victory-stat-highlight">
+                <div class="victory-stat-number">232,209</div>
+                <div class="victory-stat-label">Campaign Ceiling Win #</div>
+              </div>
+            </div>
+          </div>
+          <div class="victory-grid">
+            <div class="victory-chart-wrap">
+              <canvas id="winChart"></canvas>
+            </div>
+            <div class="victory-table">
+              <div class="vtable-row vtable-header">
+                <span>Scenario</span>
+                <span>Turnout</span>
+                <span>Total Votes</span>
+                <span>Win Number</span>
+              </div>
+              <div class="vtable-row" data-turnout="50" data-total="273187" data-win="136594">
+                <span>Baseline Midterm</span>
+                <span>50%</span>
+                <span class="vtable-total">273,187</span>
+                <span class="vtable-win">136,594</span>
+              </div>
+              <div class="vtable-row" data-turnout="55" data-total="300505" data-win="150253">
+                <span>Elevated Midterm</span>
+                <span>55%</span>
+                <span class="vtable-total">300,505</span>
+                <span class="vtable-win">150,253</span>
+              </div>
+              <div class="vtable-row vtable-highlight" data-turnout="60" data-total="327824" data-win="163913">
+                <span>High Engagement</span>
+                <span>60%</span>
+                <span class="vtable-total">327,824</span>
+                <span class="vtable-win">163,913</span>
+              </div>
+              <div class="vtable-row vtable-highlight" data-turnout="65" data-total="355143" data-win="177572">
+                <span>Wave Midterm</span>
+                <span>65%</span>
+                <span class="vtable-total">355,143</span>
+                <span class="vtable-win">177,572</span>
+              </div>
+              <div class="vtable-row vtable-highlight" data-turnout="70" data-total="382461" data-win="191231">
+                <span>Exceptional</span>
+                <span>70%</span>
+                <span class="vtable-total">382,461</span>
+                <span class="vtable-win">191,231</span>
+              </div>
+              <div class="vtable-row" data-turnout="75" data-total="409780" data-win="204891">
+                <span>Near-Presidential</span>
+                <span>75%</span>
+                <span class="vtable-total">409,780</span>
+                <span class="vtable-win">204,891</span>
+              </div>
+              <div class="vtable-row" data-turnout="80" data-total="437099" data-win="218550">
+                <span>Very High</span>
+                <span>80%</span>
+                <span class="vtable-total">437,099</span>
+                <span class="vtable-win">218,550</span>
+              </div>
+              <div class="vtable-row vtable-ceiling" data-turnout="85" data-total="464417" data-win="232209">
+                <span>Maximum Protection ★</span>
+                <span>85%</span>
+                <span class="vtable-total">464,417</span>
+                <span class="vtable-win">232,209</span>
+              </div>
+            </div>
+          </div>
+          <div class="victory-note">
+            <p>The campaign programs to the <strong>85% ceiling</strong> — ensuring the voter contact program is never under-built. At realistic D+15 wave turnout (60-70%), the win number is <strong>163,913 – 191,231</strong>.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 6: Platform -->
+      <section class="slide slide-platform" data-index="5">
         <div class="slide-inner">
           <div class="section-tag">What He Stands For</div>
           <h2 class="section-title">Evan's Platform</h2>
@@ -331,7 +420,7 @@
       </section>
 
       <!-- Slide 6: The Stakes / Opponent Contrast -->
-      <section class="slide slide-contrast" data-index="5">
+      <section class="slide slide-contrast" data-index="6">
         <div class="slide-inner">
           <div class="section-tag section-tag-red">The Stakes</div>
           <h2 class="section-title">Why This Race Matters</h2>
@@ -373,8 +462,8 @@
         </div>
       </section>
 
-      <!-- Slide 7: Donate / CTA -->
-      <section class="slide slide-donate" data-index="6">
+      <!-- Slide 8: Donate / CTA -->
+      <section class="slide slide-donate" data-index="7">
         <div class="donate-overlay"></div>
         <div class="slide-inner">
           <div class="donate-content">
