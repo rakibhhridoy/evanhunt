@@ -589,11 +589,14 @@ document.addEventListener('DOMContentLoaded', () => {
       let selectedPath = null;
       let zoomAnim = null;
 
-      // Create precinct detail panel
+      // Create precinct detail panel.
+      // Append to .district-layout (not the map container) so it sits in a
+      // stacking context above .district-bottom (proof-of-concept box).
       const detailPanel = document.createElement('div');
       detailPanel.className = 'precinct-detail';
       detailPanel.innerHTML = '<button class="precinct-detail-close">&times;</button><div class="precinct-detail-content"></div>';
-      container.appendChild(detailPanel);
+      const detailParent = container.closest('.district-layout') || container;
+      detailParent.appendChild(detailPanel);
 
       const detailClose = detailPanel.querySelector('.precinct-detail-close');
       const detailContent = detailPanel.querySelector('.precinct-detail-content');
